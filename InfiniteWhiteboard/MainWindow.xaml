@@ -1,0 +1,41 @@
+﻿<Window x:Class="InfiniteWhiteboard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InfiniteWhiteboard"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Infinite Whiteboard" Width="1280" Height="720">
+        <Grid x:Name="MainGrid">
+            <InkCanvas Name="InkCanvas" />
+
+            <DockPanel LastChildFill="True" HorizontalAlignment="Right">
+            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" >
+                <Button x:Name="ColorBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                    <materialDesign:PackIcon Kind="Palette" />
+                </Button>
+                <Button x:Name="BrushSizeBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                    <materialDesign:PackIcon Kind="Resize" />
+                </Button>
+                <Button x:Name="BrushBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                    <materialDesign:PackIcon Kind="Brush" />
+                </Button>
+                <Button x:Name="EraseBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                    <materialDesign:PackIcon Kind="Eraser" />
+                </Button>
+            </StackPanel>
+            <Grid VerticalAlignment="Center" Width="280">
+                <materialDesign:Card x:Name="ColorPickerCard" Height="200" Visibility="Collapsed">
+                        <materialDesign:ColorPicker x:Name="ColorPicker" />
+                    </materialDesign:Card>
+                <materialDesign:Card x:Name="BrushSizeCard" Padding="8 16" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock x:Name="BrushSizeText" TextAlignment="Center"></TextBlock>
+                        <Slider x:Name="BrushSizeSlider" Minimum="1" Maximum="100" />
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>
