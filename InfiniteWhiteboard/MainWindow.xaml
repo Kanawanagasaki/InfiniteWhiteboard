@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:InfiniteWhiteboard"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Infinite Whiteboard" Width="1280" Height="720">
+        Title="Infinite Whiteboard"
+        Width="1280"
+        Height="720">
         <Grid x:Name="MainGrid">
             <InkCanvas Name="InkCanvas" />
 

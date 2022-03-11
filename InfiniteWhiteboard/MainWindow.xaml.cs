@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,8 +10,29 @@ namespace InfiniteWhiteboard
 {
     public partial class MainWindow : Window
     {
-        private static readonly SolidColorBrush BRUSH_COLOR_SELECTED = new SolidColorBrush(Color.FromRgb(0x67, 0x3A, 0xB7));
-        private static readonly SolidColorBrush BRUSH_COLOR_DEFAULT = new SolidColorBrush(Color.FromRgb(0xAE, 0xEA, 0x00));
+        private static SolidColorBrush BUTTON_COLOR_SELECTED;
+        private static SolidColorBrush BUTTON_COLOR_DEFAULT;
+        private static Color COLORPICKER_COLOR_DEFAULT;
+        private static SolidColorBrush INKCANVAS_BACKGROUND_DEFAULT;
+
+        static MainWindow()
+        {
+            var val = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", 0);
+            if(val is not null && val is int theme && theme == 0)
+            {
+                BUTTON_COLOR_DEFAULT = new SolidColorBrush(Color.FromRgb(0x67, 0x3A, 0xB7));
+                BUTTON_COLOR_SELECTED = new SolidColorBrush(Color.FromRgb(0xAE, 0xEA, 0x00));
+                COLORPICKER_COLOR_DEFAULT = Colors.White;
+                INKCANVAS_BACKGROUND_DEFAULT = Brushes.Black;
+            }
+            else
+            {
+                BUTTON_COLOR_SELECTED = new SolidColorBrush(Color.FromRgb(0x67, 0x3A, 0xB7));
+                BUTTON_COLOR_DEFAULT = new SolidColorBrush(Color.FromRgb(0xAE, 0xEA, 0x00));
+                COLORPICKER_COLOR_DEFAULT = Colors.Black;
+                INKCANVAS_BACKGROUND_DEFAULT = Brushes.White;
+            }
+        }
 
         private bool _isMiddleMousePressed = false;
         private Point _cursorPrevPos;
@@ -40,12 +62,12 @@ namespace InfiniteWhiteboard
             set
             {
                 InkCanvas.EditingMode = value;
-                BrushBtn.Background = BrushBtn.BorderBrush = BRUSH_COLOR_DEFAULT;
-                EraseBtn.Background = EraseBtn.BorderBrush = BRUSH_COLOR_DEFAULT;
+                BrushBtn.Background = BrushBtn.BorderBrush = BUTTON_COLOR_DEFAULT;
+                EraseBtn.Background = EraseBtn.BorderBrush = BUTTON_COLOR_DEFAULT;
                 if (value == InkCanvasEditingMode.Ink)
-                    SetButtonColors(BrushBtn, BRUSH_COLOR_SELECTED);
+                    SetButtonColors(BrushBtn, BUTTON_COLOR_SELECTED);
                 else if (value == InkCanvasEditingMode.EraseByPoint || value == InkCanvasEditingMode.EraseByStroke)
-                    SetButtonColors(EraseBtn, BRUSH_COLOR_SELECTED);
+                    SetButtonColors(EraseBtn, BUTTON_COLOR_SELECTED);
             }
         }
 
@@ -55,7 +77,12 @@ namespace InfiniteWhiteboard
         {
             InitializeComponent();
 
-            ColorPicker.Color = BrushColor = Colors.Black;
+            SetButtonColors(ColorBtn, BUTTON_COLOR_DEFAULT);
+            SetButtonColors(BrushSizeBtn, BUTTON_COLOR_DEFAULT);
+            SetButtonColors(BrushBtn, BUTTON_COLOR_DEFAULT);
+            SetButtonColors(EraseBtn, BUTTON_COLOR_DEFAULT);
+
+            ColorPicker.Color = BrushColor = COLORPICKER_COLOR_DEFAULT;
             BrushSizeSlider.Value = BrushSize = 5;
             EditMode = InkCanvasEditingMode.Ink;
 
@@ -64,6 +91,7 @@ namespace InfiniteWhiteboard
             PreviewMouseMove += OnMouseMoveEvent;
             MouseWheel += OnMouseWheelEvent;
 
+            InkCanvas.Background = INKCANVAS_BACKGROUND_DEFAULT;
             InkCanvas.DefaultDrawingAttributes.FitToCurve = true;
             InkCanvas.PreviewMouseDown += InkCanvas_MouseDown;
             InkCanvas.Loaded += InkCanvas_Loaded;
