@@ -8,22 +8,23 @@
         mc:Ignorable="d"
         Title="Infinite Whiteboard"
         Width="1280"
-        Height="720">
-        <Grid x:Name="MainGrid">
-            <InkCanvas Name="InkCanvas" />
+        Height="720"
+        MouseLeave="Window_MouseLeave">
+    <Grid x:Name="MainGrid">
+        <InkCanvas Name="InkCanvas" />
 
-            <DockPanel LastChildFill="True" HorizontalAlignment="Right">
+        <DockPanel LastChildFill="True" HorizontalAlignment="Right">
             <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" >
-                <Button x:Name="ColorBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                <Button x:Name="ColorBtn" Margin="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
                     <materialDesign:PackIcon Kind="Palette" />
                 </Button>
-                <Button x:Name="BrushSizeBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                <Button x:Name="BrushSizeBtn" Margin="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
                     <materialDesign:PackIcon Kind="Resize" />
                 </Button>
-                <Button x:Name="BrushBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                <Button x:Name="BrushBtn" Margin="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
                     <materialDesign:PackIcon Kind="Brush" />
                 </Button>
-                <Button x:Name="EraseBtn" Margin="4 4" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+                <Button x:Name="EraseBtn" Margin="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
                     <materialDesign:PackIcon Kind="Eraser" />
                 </Button>
             </StackPanel>
@@ -39,5 +40,16 @@
                 </materialDesign:Card>
             </Grid>
         </DockPanel>
+        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="8 16">
+            <Slider x:Name="ZoomSlider"
+                    Grid.Row="1"
+                    Height="150"
+                    HorizontalAlignment="Center"
+                    Orientation="Vertical"
+                    Minimum="1"
+                    Maximum="100"
+                    Style="{StaticResource MaterialDesignDiscreteSlider}"
+                    ValueChanged="ZoomSlider_ValueChanged" />
+        </Grid>
     </Grid>
 </Window>
