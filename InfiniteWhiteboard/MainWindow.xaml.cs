@@ -3,12 +3,15 @@
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
+/// TODO: Custom title bar
 /// TODO: Save button to save project
 /// TODO: Load button to load project
 /// TODO: Shapes button
@@ -102,6 +105,7 @@ public partial class MainWindow : Window
 
     private double _zoom = 1;
     private bool _isInitializing = true;
+    private bool _isUpdatingZoom = false;
 
     public MainWindow()
     {
@@ -137,6 +141,8 @@ public partial class MainWindow : Window
         EraseBtn.Click += EraseBtn_Click;
 
         KeyUp += MainWindow_KeyUp;
+
+        TitleBarGrid.Background = new SolidColorBrush(Color.FromRgb(46,46,46));
 
         ZoomSlider.Value = (int)(_zoom * 10);
         _isInitializing = false;
@@ -270,6 +276,11 @@ public partial class MainWindow : Window
     private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_isInitializing) return;
+        if(_isUpdatingZoom)
+        {
+            _isUpdatingZoom = false;
+            return;
+        }
 
         _zoom = Math.Clamp(ZoomSlider.Value / 10d, 0.1, 10);
         var pos = new Point(MainGrid.ActualWidth / 2, MainGrid.ActualHeight / 2);
@@ -278,6 +289,8 @@ public partial class MainWindow : Window
 
     private void UpdateZoom(Point pos)
     {
+        _isUpdatingZoom = true;
+
         var matrix = InkCanvas.RenderTransform.Value;
 
         var targetWidth = InkCanvas.ActualWidth * _zoom * 10d;
@@ -310,5 +323,121 @@ public partial class MainWindow : Window
     private void Window_MouseLeave(object sender, MouseEventArgs e)
     {
         _isMiddleMousePressed = false;
+    }
+
+    private void TitleBarGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        DragMove();
+    }
+
+    private void CloseBtn_Click(object sender, RoutedEventArgs e)
+    {
+        WindowStyle = WindowStyle.SingleBorderWindow;
+        Close();
+    }
+
+    private void MaximizeBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var temp = WindowStyle;
+        WindowStyle = WindowStyle.SingleBorderWindow;
+
+        if (WindowState != WindowState.Maximized)
+            WindowState = WindowState.Maximized;
+        else WindowState = WindowState.Normal;
+
+        WindowStyle = temp;
+    }
+
+    private void MinimizeBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var temp = WindowStyle;
+        WindowStyle = WindowStyle.SingleBorderWindow;
+
+        if (WindowState != WindowState.Minimized)
+            WindowState = WindowState.Minimized;
+        else WindowState = WindowState.Normal;
+
+        WindowStyle = temp;
+    }
+
+    private void SaveBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog();
+        dialog.DefaultExt = "iwb";
+        dialog.Filter = "Infinite Whiteboard (*.iwb)|*.iwb";
+        if (!(dialog.ShowDialog() ?? false)) return;
+        var stream = File.Create(dialog.FileName);
+        var writter = new BinaryWriter(stream);
+
+        writter.Write(InkCanvas.Strokes.Count);
+        foreach(var stroke in InkCanvas.Strokes)
+        {
+            writter.Write(stroke.DrawingAttributes.Color.A);
+            writter.Write(stroke.DrawingAttributes.Color.R);
+            writter.Write(stroke.DrawingAttributes.Color.B);
+            writter.Write(stroke.DrawingAttributes.Color.G);
+
+            writter.Write(stroke.DrawingAttributes.Width);
+            writter.Write(stroke.DrawingAttributes.Height);
+            writter.Write(stroke.DrawingAttributes.FitToCurve);
+
+            writter.Write(stroke.StylusPoints.Count);
+            foreach(var point in stroke.StylusPoints)
+            {
+                writter.Write(point.X);
+                writter.Write(point.Y);
+            }
+        }
+
+        stream.Close();
+    }
+
+    private void LoadBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog();
+        dialog.DefaultExt = "iwb";
+        dialog.Filter = "Infinite Whiteboard (*.iwb)|*.iwb";
+        if (!(dialog.ShowDialog() ?? false)) return;
+        if (!File.Exists(dialog.FileName)) return;
+
+        try
+        {
+            var stream = File.OpenRead(dialog.FileName);
+            var reader = new BinaryReader(stream);
+
+            InkCanvas.Strokes.Clear();
+
+            int strokesCount = reader.ReadInt32();
+            for (int i = 0; i < strokesCount; i++)
+            {
+                byte colorA = reader.ReadByte();
+                byte colorR = reader.ReadByte();
+                byte colorG = reader.ReadByte();
+                byte colorB = reader.ReadByte();
+
+                double width = reader.ReadDouble();
+                double height = reader.ReadDouble();
+                bool isFitToCurve = reader.ReadBoolean();
+
+                var points = new StylusPointCollection();
+                int pointsCount = reader.ReadInt32();
+                for (int j = 0; j < pointsCount; j++)
+                {
+                    double pointX = reader.ReadDouble();
+                    double pointY = reader.ReadDouble();
+
+                    var point = new StylusPoint(pointX, pointY);
+                    points.Add(point);
+                }
+
+                var stroke = new Stroke(points);
+                stroke.DrawingAttributes.Color = Color.FromArgb(colorA, colorR, colorG, colorB);
+                stroke.DrawingAttributes.Width = width;
+                stroke.DrawingAttributes.Height = height;
+                stroke.DrawingAttributes.FitToCurve = isFitToCurve;
+                InkCanvas.Strokes.Add(stroke);
+            }
+        }
+        catch { }
     }
 }

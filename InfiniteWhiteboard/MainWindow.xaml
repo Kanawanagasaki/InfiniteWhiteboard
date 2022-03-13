@@ -6,14 +6,30 @@
         xmlns:local="clr-namespace:InfiniteWhiteboard"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
+        x:Name="InfiniteWhiteboardWindow"
         Title="Infinite Whiteboard"
         Width="1280"
         Height="720"
-        MouseLeave="Window_MouseLeave">
+        WindowStyle="None"
+        MouseLeave="Window_MouseLeave" >
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"/>
+    </WindowChrome.WindowChrome>
+
     <Grid x:Name="MainGrid">
         <InkCanvas Name="InkCanvas" />
 
         <DockPanel LastChildFill="True" HorizontalAlignment="Right">
+            <DockPanel.Style>
+                <Style TargetType="DockPanel">
+                    <Setter Property="Margin" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=InfiniteWhiteboardWindow, Path=WindowState}" Value="Maximized">
+                            <Setter Property="Margin" Value="0 0 8 0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DockPanel.Style>
             <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" >
                 <Button x:Name="ColorBtn" Margin="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
                     <materialDesign:PackIcon Kind="Palette" />
@@ -30,8 +46,8 @@
             </StackPanel>
             <Grid VerticalAlignment="Center" Width="280">
                 <materialDesign:Card x:Name="ColorPickerCard" Height="200" Visibility="Collapsed">
-                        <materialDesign:ColorPicker x:Name="ColorPicker" />
-                    </materialDesign:Card>
+                    <materialDesign:ColorPicker x:Name="ColorPicker" />
+                </materialDesign:Card>
                 <materialDesign:Card x:Name="BrushSizeCard" Padding="8 16" Visibility="Collapsed">
                     <StackPanel>
                         <TextBlock x:Name="BrushSizeText" TextAlignment="Center"></TextBlock>
@@ -40,7 +56,18 @@
                 </materialDesign:Card>
             </Grid>
         </DockPanel>
-        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="8 16">
+
+        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Right">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Margin" Value="8 16"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=InfiniteWhiteboardWindow, Path=WindowState}" Value="Maximized">
+                            <Setter Property="Margin" Value="16 24"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Slider x:Name="ZoomSlider"
                     Grid.Row="1"
                     Height="150"
@@ -50,6 +77,73 @@
                     Maximum="100"
                     Style="{StaticResource MaterialDesignDiscreteSlider}"
                     ValueChanged="ZoomSlider_ValueChanged" />
+        </Grid>
+
+        <Grid x:Name="TitleBarGrid" VerticalAlignment="Top" Background="White" Height="25" MouseLeftButtonDown="TitleBarGrid_MouseLeftButtonDown">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Margin" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=InfiniteWhiteboardWindow, Path=WindowState}" Value="Maximized">
+                            <Setter Property="Margin" Value="8 8 8 0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Image Margin="6 2 4 2" Grid.Column="0" VerticalAlignment="Stretch" Source="/Images/Icon.png"  />
+            <WrapPanel Grid.Column="1">
+                <Button x:Name="SaveBtn" Style="{StaticResource TitleBarButtonStyle}" Click="SaveBtn_Click">Save</Button>
+                <Button x:Name="LoadBtn" Style="{StaticResource TitleBarButtonStyle}" Click="LoadBtn_Click">Load</Button>
+            </WrapPanel>
+            <WrapPanel Grid.Column="2" Margin="0 1 1 0">
+                <Button x:Name="MinimizeBtn" Style="{StaticResource TitleBarButtonStyle}" Click="MinimizeBtn_Click">
+                    <Canvas>
+                        <Path Stroke="{Binding ElementName=MinimizeBtn, Path=Foreground}" Data="M -5,0 L 5,0" />
+                    </Canvas>
+                </Button>
+                <Button x:Name="MaximizeBtn" Style="{StaticResource TitleBarButtonStyle}" Click="MaximizeBtn_Click">
+                    <Grid>
+                        <Canvas>
+                            <Canvas.Style>
+                                <Style TargetType="Canvas">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=InfiniteWhiteboardWindow, Path=WindowState}" Value="Maximized">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Canvas.Style>
+                            <Rectangle Stroke="{Binding ElementName=MaximizeBtn, Path=Foreground}" Canvas.Left="-5" Canvas.Top="-3" Width="8" Height="8" />
+                            <Path Stroke="{Binding ElementName=MaximizeBtn, Path=Foreground}" Canvas.Left="0" Canvas.Top="0" Data="M -3,-5 L 5,-5 L 5,3" />
+                        </Canvas>
+                        <Canvas>
+                            <Canvas.Style>
+                                <Style TargetType="Canvas">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=InfiniteWhiteboardWindow, Path=WindowState}" Value="Maximized">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Canvas.Style>
+                            <Rectangle Stroke="{Binding ElementName=MaximizeBtn, Path=Foreground}" Canvas.Left="-5" Canvas.Top="-5" Width="10" Height="10" />
+                        </Canvas>
+                    </Grid>
+                </Button>
+                <Button x:Name="CloseBtn" Style="{StaticResource TitleBarButtonStyle}" Click="CloseBtn_Click">
+                    <Canvas>
+                        <Path Stroke="{Binding ElementName=CloseBtn, Path=Foreground}" Data="M -5,-5 L 5,5" />
+                        <Path Stroke="{Binding ElementName=CloseBtn, Path=Foreground}" Data="M 5,-5 L -5,5" />
+                    </Canvas>
+                </Button>
+            </WrapPanel>
         </Grid>
     </Grid>
 </Window>
